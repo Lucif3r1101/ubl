@@ -37,8 +37,9 @@ jobs:
       - name: Build binary
         run: cargo build --release --target ${{ matrix.target }}
 
-      # Prepare dist directory (moved to ensure it's always created early)
+      # Prepare dist directory (ensure it's always created early using bash for consistency)
       - name: Prepare dist directory
+        shell: bash  # <--- Add this line
         run: mkdir -p dist
 
       # For macOS: compress and copy archive
@@ -46,15 +47,14 @@ jobs:
         if: matrix.os == 'macos-latest'
         shell: bash
         run: |
-          # Ensure dist directory exists within this specific step's context
           mkdir -p dist
           tar -czf dist/ubl-${{ matrix.target }}.tar.gz -C target/${{ matrix.target }}/release ubl
 
       # For Windows and Linux: copy binary directly
       - name: Prepare binary (non-macOS)
         if: matrix.os != 'macos-latest'
+        shell: bash # <--- Add this line for the non-macOS step as well
         run: |
-          # Ensure dist directory exists within this specific step's context
           mkdir -p dist
           cp target/${{ matrix.target }}/release/ubl${{ matrix.ext }} dist/ubl-${{ matrix.target }}${{ matrix.ext }}
 
