@@ -7,7 +7,8 @@ use rand::RngCore;
 
 /// Derives a 256-bit key from password and salt using Argon2
 pub fn derive_key(password: &str, salt: &[u8]) -> [u8; 32] {
-    let salt = SaltString::b64_encode(salt).unwrap();
+    let salt = SaltString::encode_b64(salt).unwrap();
+
     let argon2 = Argon2::default();
     let hash = argon2.hash_password(password.as_bytes(), &salt).unwrap();
 

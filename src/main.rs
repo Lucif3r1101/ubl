@@ -38,6 +38,7 @@ fn main() {
             archive,
             password,
             deep,
-        } => verify::run(archive, password.clone(), *deep),
+            json,
+        } => verify::run(archive, password.clone(), *deep, *json),
     }
 }

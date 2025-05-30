@@ -39,5 +39,7 @@ pub enum Commands {
         password: Option<String>,
         #[arg(long)]
         deep: bool,
+        #[arg(long)]
+        json: bool,
     },
 }
