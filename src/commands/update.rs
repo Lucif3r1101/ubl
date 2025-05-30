@@ -2,7 +2,7 @@ use std::{
     collections::HashMap,
     fs::{self, File},
     io::{BufWriter, Cursor, Read, Write},
-    path::{Path, PathBuf},
+    path::Path,
 };
 
 use walkdir::WalkDir;

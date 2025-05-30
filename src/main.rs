@@ -16,9 +16,13 @@ fn main() {
             password,
         } => compress::run(input, output, password.clone()),
 
-        Commands::Extract { archive, password } => extract::run(archive, password.clone()),
+        Commands::Extract {
+            archive,
+            password,
+            output,
+        } => extract::run(archive, password.clone(), output.clone()),
 
-        Commands::List { archive } => list::run(archive),
+        Commands::List { archive, password } => list::run(archive, password.clone()),
 
         Commands::Update {
             archive,

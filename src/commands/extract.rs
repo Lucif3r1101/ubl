@@ -1,12 +1,12 @@
 use std::fs::{create_dir_all, File};
-use std::io::{BufReader, BufWriter, Cursor, Read};
-use std::path::Path;
+use std::io::{BufWriter, Cursor, Read};
+use std::path::{Path, PathBuf};
 
 use zstd::stream::Decoder;
 
 use crate::encrypt;
 
-pub fn run(archive_path: &str, password: Option<String>) {
+pub fn run(archive_path: &str, password: Option<String>, output: Option<String>) {
     let mut file = File::open(archive_path).unwrap();
     let mut full_data = Vec::new();
     file.read_to_end(&mut full_data).unwrap();
@@ -24,6 +24,14 @@ pub fn run(archive_path: &str, password: Option<String>) {
 
     let mut reader = Cursor::new(raw_data);
     println!("📦 Extracting...");
+
+    let archive_file = Path::new(archive_path);
+    let default_output_dir = archive_file
+        .file_stem()
+        .map(|s| s.to_string_lossy().to_string())
+        .unwrap_or_else(|| "extracted".to_string());
+
+    let base_output_dir = output.unwrap_or(default_output_dir);
 
     loop {
         let mut path_len_buf = [0u8; 4];
@@ -46,7 +54,8 @@ pub fn run(archive_path: &str, password: Option<String>) {
         let mut compressed_data = vec![0u8; compressed_len as usize];
         reader.read_exact(&mut compressed_data).unwrap();
 
-        let output_path = Path::new("output").join(&path);
+        let output_path = Path::new(&base_output_dir).join(&path);
+
         if let Some(parent) = output_path.parent() {
             create_dir_all(parent).unwrap();
         }
@@ -58,5 +67,5 @@ pub fn run(archive_path: &str, password: Option<String>) {
         println!("✅ Extracted: {}", output_path.display());
     }
 
-    println!("✅ All files restored.");
+    println!("✅ All files restored to '{}'", base_output_dir);
 }

@@ -18,10 +18,15 @@ pub enum Commands {
         archive: String,
         #[arg(short, long)]
         password: Option<String>,
+        #[arg(short, long)]
+        output: Option<String>,
     },
     List {
         archive: String,
+        #[arg(short, long)]
+        password: Option<String>,
     },
+
     Update {
         archive: String,
         #[arg(short, long)]
