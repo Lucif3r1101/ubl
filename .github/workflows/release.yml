@@ -37,18 +37,22 @@ jobs:
       - name: Build binary
         run: cargo build --release --target ${{ matrix.target }}
 
-      - name: Prepare release artifact
+      # This only runs on macOS runners
+      - name: Compress macOS binary
+        if: matrix.os == 'macos-latest'
+        shell: bash
+        run: |
+          mkdir -p dist
+          cd target/${{ matrix.target }}/release
+          tar -czf ubl-${{ matrix.target }}.tar.gz ubl
+          mv ubl-${{ matrix.target }}.tar.gz ../../../../dist/
+
+      # For Windows and Linux: copy binary directly
+      - name: Prepare binary (non-macOS)
+        if: matrix.os != 'macos-latest'
         run: |
           mkdir dist
-          
-          # If macOS, compress into .tar.gz
-          if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            cd target/${{ matrix.target }}/release
-            tar -czf ubl-${{ matrix.target }}.tar.gz ubl
-            mv ubl-${{ matrix.target }}.tar.gz ../../../dist/
-          else
-            cp target/${{ matrix.target }}/release/ubl${{ matrix.ext }} dist/ubl-${{ matrix.target }}${{ matrix.ext }}
-          fi
+          cp target/${{ matrix.target }}/release/ubl${{ matrix.ext }} dist/ubl-${{ matrix.target }}${{ matrix.ext }}
 
       - name: Upload release binaries
         uses: softprops/action-gh-release@v1
