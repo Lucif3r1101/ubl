@@ -1,51 +1,54 @@
-name: Build and Release
+name: Release
 
 on:
   push:
     tags:
       - 'v*'
 
-permissions:
-  contents: write
-
-
 jobs:
   build:
+    name: Build and Release
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            ext: ""
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            ext: ".exe"
           - os: macos-latest
             target: x86_64-apple-darwin
-            ext: ""
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - name: Set up Rust
+      - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           target: ${{ matrix.target }}
           override: true
 
-      - name: Build binary
+      - name: Build Binary
         run: cargo build --release --target ${{ matrix.target }}
 
-      - name: Rename and prepare binary
+      - name: Create .tar.gz Archive
+        if: matrix.os != 'windows-latest'
         run: |
-          mkdir dist
-          cp target/${{ matrix.target }}/release/ubl${{ matrix.ext }} dist/ubl-${{ matrix.target }}${{ matrix.ext }}
+          cd target/${{ matrix.target }}/release
+          tar -czf ubl-${{ matrix.target }}.tar.gz ubl
 
-      - name: Upload release binaries
+      - name: Create .zip for Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd target/${{ matrix.target }}/release
+          powershell Compress-Archive -Path ubl.exe -DestinationPath ubl-${{ matrix.target }}.zip
+
+      - name: Upload Release Assets
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/*
+          files: |
+            target/**/release/ubl-*.tar.gz
+            target/**/release/ubl-*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

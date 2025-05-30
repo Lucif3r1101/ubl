@@ -1,6 +1,6 @@
 use std::fs::{create_dir_all, File};
 use std::io::{BufWriter, Cursor, Read};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use zstd::stream::Decoder;
 
