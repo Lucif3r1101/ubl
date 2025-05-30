@@ -6,7 +6,6 @@ pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
 }
-
 #[derive(Subcommand)]
 pub enum Commands {
     Compress {
@@ -22,5 +21,16 @@ pub enum Commands {
     },
     List {
         archive: String,
+    },
+    Update {
+        archive: String,
+        #[arg(short, long)]
+        add: Option<String>,
+        #[arg(short, long)]
+        remove: Option<String>,
+        #[arg(short, long)]
+        replace: Option<String>,
+        #[arg(short, long)]
+        password: Option<String>,
     },
 }
