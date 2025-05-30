@@ -1,5 +1,6 @@
 mod cli;
 mod commands;
+mod encrypt;
 
 use clap::Parser;
 use cli::{Cli, Commands};
@@ -14,7 +15,9 @@ fn main() {
             output,
             password,
         } => compress::run(input, output, password.clone()),
-        Commands::Extract { archive } => extract::run(archive),
+
+        Commands::Extract { archive, password } => extract::run(archive, password.clone()),
+
         Commands::List { archive } => list::run(archive),
     }
 }

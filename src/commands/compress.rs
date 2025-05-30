@@ -1,11 +1,13 @@
 use std::fs::{self, File};
-use std::io::{BufWriter, Cursor, Write};
+use std::io::{BufWriter, Write};
 use std::path::Path;
 
 use walkdir::WalkDir;
 use zstd::stream::Encoder;
 
-pub fn run(input: &str, output: &str, _password: Option<String>) {
+use crate::encrypt;
+
+pub fn run(input: &str, output: &str, password: Option<String>) {
     let input_path = Path::new(input);
     if !input_path.exists() {
         eprintln!("Input path '{}' does not exist.", input);
@@ -14,9 +16,8 @@ pub fn run(input: &str, output: &str, _password: Option<String>) {
 
     println!("Compressing '{}' into '{}'", input, output);
 
-    let archive_file = File::create(output).expect("Failed to create archive");
-    let mut writer = BufWriter::new(archive_file);
-
+    // Compress everything into a buffer first
+    let mut archive_buf = Vec::new();
     for entry in WalkDir::new(input_path)
         .into_iter()
         .filter_map(Result::ok)
@@ -28,31 +29,39 @@ pub fn run(input: &str, output: &str, _password: Option<String>) {
         let path_bytes = path_str.as_bytes();
         let path_len = path_bytes.len() as u32;
 
-        let data = fs::read(file_path).expect("Failed to read input file");
+        let data = fs::read(file_path).unwrap();
         let original_len = data.len() as u64;
 
-        // Compress into memory first
-        let mut compressed_buf = Vec::new();
-        let mut encoder = Encoder::new(&mut compressed_buf, 21).unwrap();
+        let mut compressed = Vec::new();
+        let mut encoder = Encoder::new(&mut compressed, 21).unwrap();
         encoder.write_all(&data).unwrap();
         encoder.finish().unwrap();
 
-        let compressed_len = compressed_buf.len() as u64;
+        let compressed_len = compressed.len() as u64;
 
-        // Write header
-        writer.write_all(&path_len.to_le_bytes()).unwrap();
-        writer.write_all(path_bytes).unwrap();
-        writer.write_all(&original_len.to_le_bytes()).unwrap();
-        writer.write_all(&compressed_len.to_le_bytes()).unwrap();
-
-        // Write compressed data
-        writer.write_all(&compressed_buf).unwrap();
-
-        println!(
-            "📦 Added: {} ({} → {})",
-            path_str, original_len, compressed_len
-        );
+        archive_buf.extend(&path_len.to_le_bytes());
+        archive_buf.extend(path_bytes);
+        archive_buf.extend(&original_len.to_le_bytes());
+        archive_buf.extend(&compressed_len.to_le_bytes());
+        archive_buf.extend(&compressed);
     }
 
-    println!("✅ Compression complete");
+    let final_data = if let Some(pass) = password {
+        println!("🔒 Encrypting archive...");
+        let (salt, nonce, ciphertext) = encrypt::encrypt(&archive_buf, &pass);
+
+        let mut encrypted_data = Vec::new();
+        encrypted_data.extend(&salt);
+        encrypted_data.extend(&nonce);
+        encrypted_data.extend(&ciphertext);
+        encrypted_data
+    } else {
+        archive_buf
+    };
+
+    let out_file = File::create(output).unwrap();
+    let mut writer = BufWriter::new(out_file);
+    writer.write_all(&final_data).unwrap();
+
+    println!("✅ Archive written to '{}'", output);
 }

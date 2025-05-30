@@ -1,25 +1,34 @@
 use std::fs::{create_dir_all, File};
-use std::io::{BufReader, BufWriter, Read, Write};
+use std::io::{BufReader, BufWriter, Cursor, Read};
 use std::path::Path;
 
 use zstd::stream::Decoder;
 
-pub fn run(archive_path: &str) {
-    let archive_file = match File::open(archive_path) {
-        Ok(f) => f,
-        Err(e) => {
-            eprintln!("Failed to open archive '{}': {}", archive_path, e);
-            return;
-        }
+use crate::encrypt;
+
+pub fn run(archive_path: &str, password: Option<String>) {
+    let mut file = File::open(archive_path).unwrap();
+    let mut full_data = Vec::new();
+    file.read_to_end(&mut full_data).unwrap();
+
+    let raw_data = if let Some(pass) = password {
+        println!("🔐 Decrypting archive...");
+        let salt = &full_data[..16];
+        let nonce = &full_data[16..28];
+        let ciphertext = &full_data[28..];
+
+        encrypt::decrypt(salt, nonce, ciphertext, &pass)
+    } else {
+        full_data
     };
 
-    let mut reader = BufReader::new(archive_file);
-    println!("Extracting from '{}'", archive_path);
+    let mut reader = Cursor::new(raw_data);
+    println!("📦 Extracting...");
 
     loop {
         let mut path_len_buf = [0u8; 4];
         if reader.read_exact(&mut path_len_buf).is_err() {
-            break; // EOF
+            break;
         }
 
         let path_len = u32::from_le_bytes(path_len_buf);
@@ -29,7 +38,6 @@ pub fn run(archive_path: &str) {
 
         let mut original_len_buf = [0u8; 8];
         reader.read_exact(&mut original_len_buf).unwrap();
-        let _original_len = u64::from_le_bytes(original_len_buf);
 
         let mut compressed_len_buf = [0u8; 8];
         reader.read_exact(&mut compressed_len_buf).unwrap();
@@ -50,5 +58,5 @@ pub fn run(archive_path: &str) {
         println!("✅ Extracted: {}", output_path.display());
     }
 
-    println!("✅ Done extracting to ./output/");
+    println!("✅ All files restored.");
 }
