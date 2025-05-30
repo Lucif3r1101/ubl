@@ -4,7 +4,7 @@ mod encrypt;
 
 use clap::Parser;
 use cli::{Cli, Commands};
-use commands::{compress, extract, list, update};
+use commands::{compress, extract, list, update, verify};
 
 fn main() {
     let cli = Cli::parse();
@@ -33,5 +33,11 @@ fn main() {
             replace.clone(),
             password.clone(),
         ),
+
+        Commands::Verify {
+            archive,
+            password,
+            deep,
+        } => verify::run(archive, password.clone(), *deep),
     }
 }

@@ -33,4 +33,11 @@ pub enum Commands {
         #[arg(short, long)]
         password: Option<String>,
     },
+    Verify {
+        archive: String,
+        #[arg(long)]
+        password: Option<String>,
+        #[arg(long)]
+        deep: bool,
+    },
 }
