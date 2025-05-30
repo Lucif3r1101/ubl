@@ -1,34 +1,20 @@
-mod archive;
 mod cli;
-mod compressor;
-mod encrypt;
-mod utils;
-
-mod commands {
-    pub mod compress;
-    pub mod extract;
-    pub mod list;
-}
+mod commands;
 
 use clap::Parser;
 use cli::{Cli, Commands};
+use commands::{compress, extract, list};
 
 fn main() {
     let cli = Cli::parse();
 
-    match cli.command {
+    match &cli.command {
         Commands::Compress {
             input,
             output,
             password,
-        } => {
-            commands::compress::run(&input, &output, password);
-        }
-        Commands::Extract { archive } => {
-            commands::extract::run(&archive);
-        }
-        Commands::List { archive } => {
-            commands::list::run(&archive);
-        }
+        } => compress::run(input, output, password.clone()),
+        Commands::Extract { archive } => extract::run(archive),
+        Commands::List { archive } => list::run(archive),
     }
 }
