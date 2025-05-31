@@ -25,6 +25,6 @@ maintainer = "Lucif3r1101 rishav1101@gmail.com"
 extended-description = "UBL CLI tool for secure compression and encryption"
 depends = ""
 assets = [
-  ["target/x86_64-unknown-linux-gnu/release/ubl", "usr/bin/", "755"]
+  ["target/release/ubl", "usr/bin/", "755"]
 ]
 
