@@ -34,15 +34,27 @@ jobs:
           target: ${{ matrix.target }}
           override: true
 
+      - name: Install dependencies for Linux .deb (Linux only)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y fakeroot dpkg-dev
+
+      - name: Install cargo-deb (Linux only)
+        if: matrix.os == 'ubuntu-latest'
+        run: cargo install cargo-deb
+
       - name: Build binary
         run: cargo build --release --target ${{ matrix.target }}
 
-      # Prepare dist directory (ensure it's always created early using bash for consistency)
       - name: Prepare dist directory
-        shell: bash  # <--- Add this line
+        shell: bash
         run: mkdir -p dist
 
-      # For macOS: compress and copy archive
+      - name: Build .deb package (Linux only)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cargo deb --no-build --target ${{ matrix.target }}
+          cp target/${{ matrix.target }}/debian/*.deb dist/ubl-${{ matrix.target }}.deb
+
       - name: Compress macOS binary
         if: matrix.os == 'macos-latest'
         shell: bash
@@ -50,20 +62,9 @@ jobs:
           mkdir -p dist
           tar -czf dist/ubl-${{ matrix.target }}.tar.gz -C target/${{ matrix.target }}/release ubl
 
-      # Only for Linux: build .deb using cargo-deb
-      - name: Install cargo-deb and create .deb package
-        if: matrix.os == 'ubuntu-latest'
+      - name: Prepare binary (Windows only)
+        if: matrix.os == 'windows-latest'
         shell: bash
-        run: |
-          cargo install cargo-deb
-          cargo deb --target ${{ matrix.target }}
-          cp target/${{ matrix.target }}/debian/ubl_*.deb dist/ubl-${{ matrix.target }}.deb
-
-
-      # For Windows and Linux: copy binary directly
-      - name: Prepare binary (non-macOS)
-        if: matrix.os != 'macos-latest'
-        shell: bash # <--- Add this line for the non-macOS step as well
         run: |
           mkdir -p dist
           cp target/${{ matrix.target }}/release/ubl${{ matrix.ext }} dist/ubl-${{ matrix.target }}${{ matrix.ext }}
