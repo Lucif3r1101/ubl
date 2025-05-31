@@ -3,6 +3,20 @@ name = "ubl"
 version = "0.1.0"
 edition = "2021"
 
+[package.metadata.deb]
+maintainer = "Lucif3r1101 rishav1101@gmail.com"
+depends = ""
+license = "MIT"
+extended-description = """\
+UBL is a CLI tool that helps with encrypting, compressing, and managing secure files efficiently.
+"""
+section = "utils"
+priority = "optional"
+assets = [
+  ["target/release/ubl", "usr/bin/ubl", "755"]
+]
+
+
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }
 walkdir = "2.4"

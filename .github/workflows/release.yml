@@ -50,6 +50,16 @@ jobs:
           mkdir -p dist
           tar -czf dist/ubl-${{ matrix.target }}.tar.gz -C target/${{ matrix.target }}/release ubl
 
+      # Only for Linux: build .deb using cargo-deb
+      - name: Install cargo-deb and create .deb package
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          cargo install cargo-deb
+          cargo deb --target ${{ matrix.target }}
+          cp target/${{ matrix.target }}/debian/ubl_*.deb dist/ubl-${{ matrix.target }}.deb
+
+
       # For Windows and Linux: copy binary directly
       - name: Prepare binary (non-macOS)
         if: matrix.os != 'macos-latest'
