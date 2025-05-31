@@ -15,7 +15,36 @@ A simple Rust-based command-line tool to compress, encrypt, extract, list, verif
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Installation
+
+### 🔧 macOS (via Homebrew)
+
+If you've installed a previous version manually, first untap it:
+
+```bash
+brew untap lucif3r1101/ubl || true
+```
+
+Then install the latest version:
+
+```bash
+brew tap lucif3r1101/ubl
+brew install ubl
+```
+
+### 🐧 Linux (via `.deb` package)
+
+```bash
+wget https://github.com/Lucif3r1101/ubl/releases/download/v0.1.9/ubl-x86_64-unknown-linux-gnu.deb
+sudo dpkg -i ubl-x86_64-unknown-linux-gnu.deb
+ubl --help
+```
+
+> APT repository-based install is coming soon!
+
+---
+
+## 🛠️ Manual Build
 
 ### 1. Build the Project
 
@@ -45,13 +74,13 @@ echo "This is a test" > sample_dir/readme.md
 ### Without password:
 
 ```bash
-./target/release/ubl compress sample_dir archive.ubl
+ubl compress sample_dir archive.ubl
 ```
 
 ### With password:
 
 ```bash
-./target/release/ubl compress sample_dir secure.ubl --password secret123
+ubl compress sample_dir secure.ubl --password secret123
 ```
 
 ---
@@ -61,25 +90,25 @@ echo "This is a test" > sample_dir/readme.md
 ### Default (extracts to folder `archive/`):
 
 ```bash
-./target/release/ubl extract archive.ubl
+ubl extract archive.ubl
 ```
 
 ### Custom output folder:
 
 ```bash
-./target/release/ubl extract archive.ubl extracted_folder
+ubl extract archive.ubl extracted_folder
 ```
 
 ### Password-protected archive:
 
 ```bash
-./target/release/ubl extract secure.ubl --password secret123
+ubl extract secure.ubl --password secret123
 ```
 
 Or with custom output:
 
 ```bash
-./target/release/ubl extract secure.ubl extracted_secure --password secret123
+ubl extract secure.ubl extracted_secure --password secret123
 ```
 
 ---
@@ -89,13 +118,13 @@ Or with custom output:
 ### Without password:
 
 ```bash
-./target/release/ubl list archive.ubl
+ubl list archive.ubl
 ```
 
 ### With password:
 
 ```bash
-./target/release/ubl list secure.ubl --password secret123
+ubl list secure.ubl --password secret123
 ```
 
 ---
@@ -105,19 +134,19 @@ Or with custom output:
 ### Without password:
 
 ```bash
-./target/release/ubl verify archive.ubl
+ubl verify archive.ubl
 ```
 
 ### With password:
 
 ```bash
-./target/release/ubl verify secure.ubl --password secret123
+ubl verify secure.ubl --password secret123
 ```
 
 ### Deep verify (checks file content if implemented):
 
 ```bash
-./target/release/ubl verify secure.ubl --password secret123 --deep
+ubl verify secure.ubl --password secret123 --deep
 ```
 
 ---
@@ -128,20 +157,20 @@ Or with custom output:
 
 ```bash
 echo "Extra file" > extra.txt
-./target/release/ubl update archive.ubl --add extra.txt
+ubl update archive.ubl --add extra.txt
 ```
 
 ### Remove a file (with password):
 
 ```bash
-./target/release/ubl update secure.ubl --password secret123 --remove hello.txt
+ubl update secure.ubl --password secret123 --remove hello.txt
 ```
 
 ### Replace a file:
 
 ```bash
 echo "Updated README content" > readme.md
-./target/release/ubl update archive.ubl --replace readme.md
+ubl update archive.ubl --replace readme.md
 ```
 
 ---
@@ -164,27 +193,27 @@ echo "Updated README content" > readme.md
 
 ```bash
 # Compress
-./target/release/ubl compress sample_dir archive.ubl
-./target/release/ubl compress sample_dir secure.ubl --password secret123
+ubl compress sample_dir archive.ubl
+ubl compress sample_dir secure.ubl --password secret123
 
 # Extract
-./target/release/ubl extract archive.ubl
-./target/release/ubl extract secure.ubl --password secret123
+ubl extract archive.ubl
+ubl extract secure.ubl --password secret123
 
 # List
-./target/release/ubl list archive.ubl
-./target/release/ubl list secure.ubl --password secret123
+ubl list archive.ubl
+ubl list secure.ubl --password secret123
 
 # Verify
-./target/release/ubl verify archive.ubl
-./target/release/ubl verify secure.ubl --password secret123
-./target/release/ubl verify secure.ubl --password secret123 --deep
+ubl verify archive.ubl
+ubl verify secure.ubl --password secret123
+ubl verify secure.ubl --password secret123 --deep
 
 # Update
 echo "Another file" > extra.txt
-./target/release/ubl update archive.ubl --add extra.txt
-./target/release/ubl update secure.ubl --password secret123 --remove hello.txt
-./target/release/ubl update archive.ubl --replace readme.md
+ubl update archive.ubl --add extra.txt
+ubl update secure.ubl --password secret123 --remove hello.txt
+ubl update archive.ubl --replace readme.md
 ```
 
 ---
