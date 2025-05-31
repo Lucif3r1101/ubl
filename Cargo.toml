@@ -21,10 +21,12 @@ hex = "0.4"
 indicatif = "0.17"
 
 [package.metadata.deb]
-maintainer = "Lucif3r1101 rishav1101@gmail.com"
+maintainer = "Lucif3r1101 <rishav1101@gmail.com>"
+copyright = "Copyright © 2024 Lucif3r1101"
 extended-description = "UBL CLI tool for secure compression and encryption"
 depends = ""
 assets = [
   ["target/release/ubl", "usr/bin/", "755"]
 ]
+
 
