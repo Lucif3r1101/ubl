@@ -1,7 +1,9 @@
 use std::fs::{self, File};
 use std::io::{BufWriter, Write};
 use std::path::Path;
+use std::time::Instant;
 
+use indicatif::{ProgressBar, ProgressStyle};
 use walkdir::WalkDir;
 use zstd::stream::Encoder;
 
@@ -14,15 +16,27 @@ pub fn run(input: &str, output: &str, password: Option<String>) {
         return;
     }
 
-    println!("Compressing '{}' into '{}'", input, output);
+    println!("📦 Compressing '{}' into '{}'", input, output);
+    let start = Instant::now();
 
-    // Compress everything into a buffer first
-    let mut archive_buf = Vec::new();
-    for entry in WalkDir::new(input_path)
+    let files: Vec<_> = WalkDir::new(input_path)
         .into_iter()
         .filter_map(Result::ok)
         .filter(|e| e.file_type().is_file())
-    {
+        .collect();
+
+    let pb = ProgressBar::new(files.len() as u64);
+    pb.set_style(
+        ProgressStyle::with_template(
+            "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} {msg}",
+        )
+        .unwrap()
+        .progress_chars("#>-"),
+    );
+
+    let mut archive_buf = Vec::new();
+
+    for entry in files {
         let file_path = entry.path();
         let relative_path = file_path.strip_prefix(input_path).unwrap();
         let path_str = relative_path.to_string_lossy();
@@ -44,7 +58,12 @@ pub fn run(input: &str, output: &str, password: Option<String>) {
         archive_buf.extend(&original_len.to_le_bytes());
         archive_buf.extend(&compressed_len.to_le_bytes());
         archive_buf.extend(&compressed);
+
+        pb.set_message(path_str.to_string());
+        pb.inc(1);
     }
+
+    pb.finish_with_message("🎉 Compression done");
 
     let final_data = if let Some(pass) = password {
         println!("🔒 Encrypting archive...");
@@ -63,5 +82,7 @@ pub fn run(input: &str, output: &str, password: Option<String>) {
     let mut writer = BufWriter::new(out_file);
     writer.write_all(&final_data).unwrap();
 
+    let duration = start.elapsed();
     println!("✅ Archive written to '{}'", output);
+    println!("🕒 Completed in {:.2?}", duration);
 }
