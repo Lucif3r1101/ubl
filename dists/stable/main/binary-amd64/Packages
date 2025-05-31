@@ -1,0 +1,14 @@
+Package: ubl
+Version: 0.1.0-1
+Architecture: amd64
+Maintainer: Lucif3r1101 <rishav1101@gmail.com>
+Installed-Size: 2228
+Filename: ./ubl-x86_64-unknown-linux-gnu.deb
+Size: 744756
+MD5sum: 32431556d88888002adabf32ff4f6da9
+SHA1: 12421b2fb7d0d5171bfe75528a057c8058809bc6
+SHA256: fad91bd3289fd5884862b3c8cbf31bf4158359b020c7f6e9a6b90dff1ad5e1fb
+Priority: optional
+Description: [generated from Rust crate ubl]
+ UBL CLI tool for secure compression and encryption
+
